@@ -1,0 +1,16 @@
+{
+    "name": "Calendar",
+    "alias": "calendar",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 10,
+    "providers": [
+        "Modules\\Calendar\\Providers\\CalendarServiceProvider",
+        "Modules\\Calendar\\Providers\\RouteServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ]
+}
