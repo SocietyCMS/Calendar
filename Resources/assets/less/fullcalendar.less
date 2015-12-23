@@ -1,0 +1,25 @@
+
+.fc-button {
+  .ui.button;
+  border-radius: 0;
+  &:hover,
+  &:active,
+  &.hover {
+    background-color: @hoverBackgroundColor;
+    background-image: @hoverBackgroundImage;
+    box-shadow: @hoverBoxShadow;
+    color: @hoverColor;
+  }
+}
+
+.fc-button.fc-state-active, .fc-button.fc-state-down {
+  .ui.active.button;
+}
+
+
+.fc td.fc-today {
+  background-color: @blueBackground;
+  color: @blueTextColor;
+}
+
+
