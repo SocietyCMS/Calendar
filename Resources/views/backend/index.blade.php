@@ -8,12 +8,29 @@
 @endsection
 
 @section('content')
-	<div id='calendar'></div>
+
+	<div class="ui grid">
+		<div class="six wide column">
+			<div class="ui blue segment">
+				<div class="ui red small message">Red</div>
+				<div class="ui orange small message">Orange</div>
+				<div class="ui yellow small message">Yellow</div>
+				<div class="ui olive small message">Olive</div>
+				<div class="ui green small message">Green</div>
+				<div class="ui teal small message">Teal</div>
+				<div class="ui blue small message">Blue</div>
+				<div class="ui violet small message">Violet</div>
+				<div class="ui purple small message">Purple</div>
+			</div>
+		</div>
+		<div class="ten wide column"><div id='calendar'></div></div>
+	</div>
+
+
 @endsection
 
 @section('javascript')
 	<script src="{{\Pingpong\Modules\Facades\Module::asset('calendar:js/vendor.js')}}"></script>
-
 	<script>
 		$(document).ready(function() {
 
@@ -39,46 +56,50 @@
 					{
 						title: 'All Day Event',
 						start: new Date(y, m, 1),
-						backgroundColor: "#f56954", //red
-						borderColor: "#f56954" //red
+						className: "red" //red
 					},
 					{
 						title: 'Long Event',
 						start: new Date(y, m, d - 5),
 						end: new Date(y, m, d - 2),
-						backgroundColor: "#f39c12", //yellow
-						borderColor: "#f39c12" //yellow
+						className: "red" //red
 					},
 					{
 						title: 'Meeting',
 						start: new Date(y, m, d, 10, 30),
 						allDay: false,
-						backgroundColor: "#0073b7", //Blue
-						borderColor: "#0073b7" //Blue
+						className: "red" //red
 					},
 					{
 						title: 'Lunch',
 						start: new Date(y, m, d, 12, 0),
 						end: new Date(y, m, d, 14, 0),
 						allDay: false,
-						backgroundColor: "#00c0ef", //Info (aqua)
-						borderColor: "#00c0ef" //Info (aqua)
+						className: "red" //red
 					},
 					{
 						title: 'Birthday Party',
 						start: new Date(y, m, d + 1, 19, 0),
 						end: new Date(y, m, d + 1, 22, 30),
 						allDay: false,
-						backgroundColor: "#00a65a", //Success (green)
-						borderColor: "#00a65a" //Success (green)
+						className: "red" //red
+					},
+					{
+						id: 999,
+						title: 'Repeating Event',
+						start: new Date(y, m, d + 1, 19, 0)
+					},
+					{
+						id: 999,
+						title: 'Repeating Event',
+						start:new Date(y, m, d + 8, 19, 0)
 					},
 					{
 						title: 'Click for Google',
 						start: new Date(y, m, 28),
 						end: new Date(y, m, 29),
 						url: 'http://google.com/',
-						backgroundColor: "#3c8dbc", //Primary (light-blue)
-						borderColor: "#3c8dbc" //Primary (light-blue)
+						className: "red" //red
 					}
 				],
 				editable: true,
