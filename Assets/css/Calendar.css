@@ -97,6 +97,10 @@
 .ui.brown.calendar.event .header {
   color: #935b38;
 }
+.fc-day-grid-event.calendar.event {
+  padding: 0 1px;
+  margin: 1px 2px 0;
+}
 .fc-button {
   cursor: pointer;
   display: inline-block;

@@ -16,6 +16,7 @@ class EventTransformer extends Fractal\TransformerAbstract
             'allDay'     => (bool) $event->allDay,
             'start'     => $event->start->toIso8601String(),
             'end'     => $event->end->toIso8601String(),
+            'className' => 'ui blue calendar event'
         ];
     }
 }

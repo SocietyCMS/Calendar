@@ -14,11 +14,11 @@ class CreateEventTable extends Migration
     {
         Schema::create('calendar__events', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('title');
+            $table->string('title')->required();
             $table->string('location');
             $table->text('description');
             $table->boolean('allDay')->default(1);
-            $table->timestamp('start');
+            $table->timestamp('start')->required();
             $table->timestamp('end');
             $table->timestamps();
             $table->softDeletes();

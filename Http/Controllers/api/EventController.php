@@ -3,6 +3,7 @@
 namespace Modules\Calendar\Http\Controllers\api;
 
 use Illuminate\Http\Request;
+use Modules\Calendar\Http\Requests\EventRequest;
 use Modules\Calendar\Repositories\EventRepository;
 use Modules\Calendar\Transformers\EventTransformer;
 use Modules\Core\Http\Controllers\ApiBaseController;
@@ -13,7 +14,6 @@ use Modules\Core\Http\Controllers\ApiBaseController;
  */
 class EventController extends ApiBaseController
 {
-
 
     /**
      * @var EventRepository
@@ -37,11 +37,20 @@ class EventController extends ApiBaseController
     {
         $events = $this->event->findWhereBetween([
             ['start', [$request->start, $request->end]],
-            ['end', [$request->start, $request->end]]
+            ['end', [$request->start, $request->end]],
         ]);
 
-
         return $this->response->collection($events, new EventTransformer);
+    }
 
+    /**
+     * @param EventRequest $request
+     * @return mixed
+     */
+    public function store(EventRequest $request)
+    {
+        $event = $this->event->create($request->input());
+
+        return $this->successCreated();
     }
 }
