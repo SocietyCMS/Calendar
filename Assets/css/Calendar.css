@@ -151,5 +151,9 @@
   background-color: #DFF0FF;
   color: #2185D0;
 }
+.fc .fc-time-grid-event {
+  position: absolute;
+  z-index: 1;
+}
 
 /*# sourceMappingURL=Calendar.css.map */

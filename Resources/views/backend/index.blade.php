@@ -17,7 +17,7 @@
                     <i class="dropdown icon"></i>
                     Saved Events
                 </div>
-                <div class="content">
+                <div class="content" id="external-events">
                     <div class="transition hidden">
                         <div class="ui red calendar event">Red</div>
                         <div class="ui orange calendar event">Orange</div>
@@ -90,6 +90,20 @@
     <script>
         $('.ui.accordion').accordion({exclusive: false});
 
+        function ini_events(ele) {
+            ele.each(function () {
+
+                // make the event draggable using jQuery UI
+                $(this).draggable({
+                    zIndex: 1070,
+                    revert: true, // will cause the event to go back to its
+                    revertDuration: 0  //  original position after the drag
+                });
+
+            });
+        }
+
+        ini_events($('#external-events .calendar.event'));
 
         var EventDetail = new Vue({
             el: '#eventDetail',
@@ -104,11 +118,6 @@
         });
 
         $(document).ready(function () {
-
-            var date = new Date();
-            var d = date.getDate(),
-                    m = date.getMonth(),
-                    y = date.getFullYear();
 
             $('#calendar').fullCalendar({
                 header: {
@@ -130,9 +139,26 @@
                     });
 
                 },
+                eventResize: function(event, delta, revertFunc) {
+                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
 
+                    resource.update({id: event.id},{data: event}).then(function (response) {
+                        $('#calendar').fullCalendar('updateEvent',event);
+                    }, function (errorResponse) {
+                        revertFunc();
+                    });
+
+                },
+                eventDrop: function(event, delta, revertFunc) {
+                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
+
+                    resource.update({id: event.id},{data: event}).then(function (response) {
+                        $('#calendar').fullCalendar('updateEvent',event);
+                    }, function (errorResponse) {
+                        revertFunc();
+                    });
+                },
                 eventReceive: function(event){
-
                     var data = {
                         title: 'Doorm',
                         start: new Date()
@@ -140,14 +166,12 @@
 
                     var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.store')}}');
 
-                    resource.post({data: data}).then(function (response) {
+                    resource.save({data: data}).then(function (response) {
                         event.id = response.id;
                         $('#calendar').fullCalendar('updateEvent',event);
                     });
                 },
-
                 eventRender: function (event, element) {
-
                     $(element).popup({
                         on: 'click',
                         title    : event.title,
@@ -155,26 +179,19 @@
                     });
 
                 },
-                eventClick: function (calEvent, jsEvent, view) {
-                    /*
-                    $(this).popup('hide all');
 
-                    $(this).popup({
-                        on: 'manual',
-                        popup: '#eventDetail'
-                    });
+                drop: function (date, jsEvent) {
 
-                    EventDetail.title = calEvent.title;
-                    EventDetail.location = calEvent.location;
-                    EventDetail.description = calEvent.description;
-                    EventDetail.allDay = calEvent.allDay;
-                    EventDetail.start = calEvent.start;
-                    EventDetail.end = calEvent.end;
+                    var copiedEventObject = {};
+                    copiedEventObject.title = "Demo";
+                    copiedEventObject.start = date;
+                    copiedEventObject.allDay = true;
 
-                    console.log(calEvent, jsEvent, view);
-                    $(this).popup('show');
-                    */
+                    // render the event on the calendar
+                    // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
+                    $('#calendar').fullCalendar('renderEvent', copiedEventObject);
                 },
+
                 editable: true,
                 droppable: true
             });

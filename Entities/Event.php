@@ -4,7 +4,7 @@ namespace Modules\Calendar\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\User\Traits\Activity\RecordsActivity;
-
+use Carbon\Carbon;
 
 
 class Event extends Model
@@ -33,4 +33,28 @@ class Event extends Model
     protected static $templatePath = 'calendar::backend.activities';
 
     protected $dates = ['start', 'end', 'deleted_at'];
+
+
+    /**
+     * @param  string $value
+     * @return string
+     */
+    public function setStartAttribute($value)
+    {
+        $this->attributes['start'] = Carbon::parse($value);
+    }
+
+    /**
+     * @param  string $value
+     * @return string
+     */
+    public function setEndAttribute($value)
+    {
+        if (!is_null($value)) {
+            $this->attributes['end'] = Carbon::parse($value);
+        } else {
+            $this->attributes['end']=null;
+        }
+    }
+
 }
