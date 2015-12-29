@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateEventTable extends Migration
+class CreateCalendarEventTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,6 +17,7 @@ class CreateEventTable extends Migration
             $table->string('title')->required();
             $table->string('location');
             $table->text('description');
+            $table->string('className');
             $table->boolean('allDay')->default(1);
             $table->timestamp('start')->required();
             $table->timestamp('end');

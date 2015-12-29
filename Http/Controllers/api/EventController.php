@@ -5,7 +5,6 @@ namespace Modules\Calendar\Http\Controllers\api;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\Calendar\Http\Requests\EventStoreRequest;
-use Modules\Calendar\Http\Requests\EventUpdateRequest;
 use Modules\Calendar\Repositories\EventRepository;
 use Modules\Calendar\Transformers\EventTransformer;
 use Modules\Core\Http\Controllers\ApiBaseController;
@@ -46,7 +45,7 @@ class EventController extends ApiBaseController
     }
 
     /**
-     * @param EventRequest $request
+     * @param Request $request
      * @return mixed
      */
     public function update(Request $request, $id)
@@ -61,7 +60,7 @@ class EventController extends ApiBaseController
 
 
     /**
-     * @param EventRequest $request
+     * @param Request $request
      * @return mixed
      */
     public function store(EventStoreRequest $request)

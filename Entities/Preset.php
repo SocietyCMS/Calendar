@@ -7,31 +7,31 @@ use Modules\User\Traits\Activity\RecordsActivity;
 use Carbon\Carbon;
 
 
-class Event extends Model
+/**
+ * Class Preset
+ * @package Modules\Calendar\Entities
+ */
+class Preset extends Model
 {
-    use RecordsActivity;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'calendar__events';
+    protected $table = 'calendar__presets';
 
     /**
      * The fillable properties of the model.
      *
      * @var array
      */
-    protected $fillable = ['title', 'location', 'description', 'className', 'allDay', 'start', 'end'];
+    protected $fillable = ['title', 'location', 'description', 'className','allDay', 'start', 'end'];
+
 
     /**
-     * Views for the Dashboard timeline.
-     *
-     * @var string
+     * @var array
      */
-    protected static $templatePath = 'calendar::backend.activities';
-
     protected $dates = ['start', 'end', 'deleted_at'];
 
 

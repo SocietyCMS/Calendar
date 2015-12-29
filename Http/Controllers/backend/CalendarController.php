@@ -6,9 +6,9 @@ use Modules\Core\Http\Controllers\AdminBaseController;
 
 class CalendarController extends AdminBaseController
 {
-
     public function index()
     {
-        return view('calendar::backend.index');
+        $presets = $this->apiDispatcher->get('api/calendar/preset');
+        return view('calendar::backend.index', compact('presets'));
     }
 }

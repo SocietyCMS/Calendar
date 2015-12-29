@@ -9,5 +9,6 @@ $api->version('v1', function ($api) {
     ], function ($api) {
 
         $api->resource('event', 'EventController', ['only' => ['index', 'store', 'show', 'update', 'destroy']]);
+        $api->resource('preset', 'PresetController', ['only' => ['index', 'store', 'show', 'update', 'destroy']]);
     });
 });

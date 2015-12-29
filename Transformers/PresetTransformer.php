@@ -4,7 +4,7 @@ namespace Modules\Calendar\Transformers;
 
 use League\Fractal;
 
-class EventTransformer extends Fractal\TransformerAbstract
+class PresetTransformer extends Fractal\TransformerAbstract
 {
     public function transform($event)
     {
@@ -14,9 +14,9 @@ class EventTransformer extends Fractal\TransformerAbstract
             'location' => $event->location,
             'description' => $event->description,
             'allDay' => (bool)$event->allDay,
-            'start' => $event->start->toIso8601String(),
+            'start' => $event->start->toTimeString(),
             'end' => (is_null($event->end)) ? null : $event->end->toIso8601String(),
-            'className' => 'ui calendar event '.$event->className
+            'className' => $event->className
         ];
     }
 }
