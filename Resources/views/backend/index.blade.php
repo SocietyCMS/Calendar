@@ -75,12 +75,24 @@
 
 
 
-    <div class="ui popup" id="eventDetail">
-        <div class="header">@{{ event.title }}</div>
-        <div class="content">@{{ event.location }}</div>
-        <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum
-            tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas
-            semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+    <div class="ui flowing popup" id="eventDetail">
+            <form class="ui form">
+                <div class="fourteen wide field">
+                    <label>First Name</label>
+                    <input type="text" name="first-name" placeholder="First Name">
+                </div>
+                <div class="fourteen wide field">
+                    <label>Last Name</label>
+                    <input type="text" name="last-name" placeholder="Last Name">
+                </div>
+                <div class="field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" tabindex="0" class="hidden">
+                        <label>I agree to the Terms and Conditions</label>
+                    </div>
+                </div>
+                <button class="ui button" type="submit">Submit</button>
+            </form>
     </div>
 
 @endsection
@@ -163,7 +175,6 @@
                     resource.get({start: start.format(), end: end.format()}).then(function (response) {
                         callback(response.data.data)
                     });
-
                 },
                 eventResize: function (event, delta, revertFunc) {
                     var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
