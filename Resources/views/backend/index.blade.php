@@ -19,15 +19,18 @@
                 </div>
                 <div class="content" id="external-events">
                     <div class="transition hidden">
-                        <div class="ui red calendar event">Red</div>
-                        <div class="ui orange calendar event">Orange</div>
-                        <div class="ui yellow calendar event">Yellow</div>
-                        <div class="ui olive calendar event">Olive</div>
-                        <div class="ui green calendar event">Green</div>
-                        <div class="ui teal calendar event">Teal</div>
-                        <div class="ui blue calendar event">Blue</div>
-                        <div class="ui violet calendar event">Violet</div>
-                        <div class="ui purple calendar event">Purple</div>
+                        @foreach($presets as $preset)
+                            <div class="ui {{$preset->className}} calendar event"
+                                 data-title="{{$preset->title}}"
+                                 data-location="{{$preset->location}}"
+                                 data-description="{{$preset->description}}"
+                                 data-allday="{{$preset->allDay}}"
+                                 data-start="{{$preset->start->toIso8601String()}}"
+                                 data-end="{{$preset->end->toIso8601String()}}"
+                                 data-duration="{{ $preset->start->diffInMinutes($preset->end) }}"
+                                 data-classname="ui {{$preset->className}} calendar event"
+                            >{{$preset->title}}</div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -53,7 +56,6 @@
                             <i class="grey big square icon"></i>
                         </div>
 
-
                         <div class="ui action input">
                             <input type="text" placeholder="Title">
                             <button class="ui button">Add</button>
@@ -74,8 +76,11 @@
 
 
     <div class="ui popup" id="eventDetail">
-        <div class="header">@{{ title }}</div>
-        <div class="content">@{{ location }}</div>
+        <div class="header">@{{ event.title }}</div>
+        <div class="content">@{{ event.location }}</div>
+        <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum
+            tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas
+            semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
     </div>
 
 @endsection
@@ -90,8 +95,25 @@
     <script>
         $('.ui.accordion').accordion({exclusive: false});
 
-        function ini_events(ele) {
-            ele.each(function () {
+        function ini_eventPresets(preset) {
+            preset.each(function () {
+
+                // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
+                // it doesn't need to have a start or end
+                var eventObject = {
+                    title: $.trim($(this).data('title')),
+                    location: $.trim($(this).data('location')),
+                    description: $.trim($(this).data('description')),
+                    allDay: $.trim($(this).data('allday')),
+                    start: $.trim($(this).data('start')),
+                    end: $.trim($(this).data('end')),
+                    duration: $.trim($(this).data('duration')),
+                    className: $.trim($(this).data('classname'))
+                };
+
+
+                // store the Event Object in the DOM element so we can get to it later
+                $(this).data('eventObject', eventObject);
 
                 // make the event draggable using jQuery UI
                 $(this).draggable({
@@ -103,17 +125,19 @@
             });
         }
 
-        ini_events($('#external-events .calendar.event'));
+        ini_eventPresets($('#external-events .calendar.event'));
 
         var EventDetail = new Vue({
             el: '#eventDetail',
             data: {
-                title: '',
-                location: '',
-                description: '',
-                allDay: false,
-                start: null,
-                end: null
+                event: {
+                    title: '',
+                    location: '',
+                    description: '',
+                    allDay: false,
+                    start: null,
+                    end: null
+                }
             }
         });
 
@@ -132,6 +156,8 @@
                     day: 'day'
                 },
                 firstDay: 1,
+                editable: true,
+                droppable: true,
                 events: function (start, end, timezone, callback) {
                     var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.index')}}');
                     resource.get({start: start.format(), end: end.format()}).then(function (response) {
@@ -139,61 +165,61 @@
                     });
 
                 },
-                eventResize: function(event, delta, revertFunc) {
+                eventResize: function (event, delta, revertFunc) {
                     var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
 
-                    resource.update({id: event.id},{data: event}).then(function (response) {
-                        $('#calendar').fullCalendar('updateEvent',event);
-                    }, function (errorResponse) {
-                        revertFunc();
-                    });
-
-                },
-                eventDrop: function(event, delta, revertFunc) {
-                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
-
-                    resource.update({id: event.id},{data: event}).then(function (response) {
-                        $('#calendar').fullCalendar('updateEvent',event);
+                    resource.update({id: event.id}, event).then(function (response) {
+                        $('#calendar').fullCalendar('updateEvent', event);
                     }, function (errorResponse) {
                         revertFunc();
                     });
                 },
-                eventReceive: function(event){
-                    var data = {
-                        title: 'Doorm',
-                        start: new Date()
-                    };
+                eventDrop: function (event, delta, revertFunc) {
+                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
 
-                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.store')}}');
-
-                    resource.save({data: data}).then(function (response) {
-                        event.id = response.id;
-                        $('#calendar').fullCalendar('updateEvent',event);
+                    resource.update({id: event.id}, event).then(function (response) {
+                        $('#calendar').fullCalendar('updateEvent', event);
+                    }, function (errorResponse) {
+                        revertFunc();
                     });
                 },
                 eventRender: function (event, element) {
-                    $(element).popup({
-                        on: 'click',
-                        title    : event.title,
-                        content  : event.location
+
+                },
+                drop: function (date, jsEvent, ui) {
+
+                    var originalEventObject = $(this).data('eventObject');
+                    var event = $.extend({}, originalEventObject);
+
+                    event.start = date;
+                    if (event.end > 0) {
+                        event.end = date.clone().add({minutes: event.duration});
+                    }
+
+                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.store')}}');
+                    resource.save(event).then(function (response) {
+                        event.id = response.id;
+                        $('#calendar').fullCalendar('updateEvent', event);
                     });
 
+                    console.log(event);
+                    $('#calendar').fullCalendar('renderEvent', event);
                 },
+                eventClick: function (event, jsEvent) {
 
-                drop: function (date, jsEvent) {
+                    if (!$(this).popup('exists')) {
+                        $(this).popup({
+                            popup: $('#eventDetail'),
+                            target: $(this),
+                            on: 'manual'
+                        })
+                    }
 
-                    var copiedEventObject = {};
-                    copiedEventObject.title = "Demo";
-                    copiedEventObject.start = date;
-                    copiedEventObject.allDay = true;
+                    EventDetail.event = event;
+                    $(this).popup('show');
+                    $(this).popup('reposition');
 
-                    // render the event on the calendar
-                    // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
-                    $('#calendar').fullCalendar('renderEvent', copiedEventObject);
-                },
-
-                editable: true,
-                droppable: true
+                }
             });
 
         });

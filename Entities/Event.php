@@ -7,6 +7,10 @@ use Modules\User\Traits\Activity\RecordsActivity;
 use Carbon\Carbon;
 
 
+/**
+ * Class Event
+ * @package Modules\Calendar\Entities
+ */
 class Event extends Model
 {
     use RecordsActivity;
@@ -32,8 +36,10 @@ class Event extends Model
      */
     protected static $templatePath = 'calendar::backend.activities';
 
+    /**
+     * @var array
+     */
     protected $dates = ['start', 'end', 'deleted_at'];
-
 
     /**
      * @param  string $value

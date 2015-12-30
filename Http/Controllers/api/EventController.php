@@ -5,6 +5,7 @@ namespace Modules\Calendar\Http\Controllers\api;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\Calendar\Http\Requests\EventStoreRequest;
+use Modules\Calendar\Http\Requests\EventUpdateRequest;
 use Modules\Calendar\Repositories\EventRepository;
 use Modules\Calendar\Transformers\EventTransformer;
 use Modules\Core\Http\Controllers\ApiBaseController;
@@ -48,10 +49,13 @@ class EventController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request, $id)
+    public function update(EventUpdateRequest $request, $id)
     {
-        $input = array_merge($request->data, [
-            'end' => (is_null($request->data['end']) && $request->data['allDay'] == true) ? Carbon::parse($request->data['start'])->addDay() : $request->data['end']
+        $classNames = array_flip(array_except(array_flip($request->className), ['ui', 'calendar', 'event']));
+
+        $input = array_merge($request->input(), [
+            'end' => (is_null($request->end) && $request->allDay == true) ? Carbon::parse($request->start)->addDay() : $request->end,
+            'className' => implode(' ', $classNames)
         ]);
 
         $event = $this->event->update($input, $id);
@@ -66,7 +70,6 @@ class EventController extends ApiBaseController
     public function store(EventStoreRequest $request)
     {
         $event = $this->event->create($request->input());
-
         return $this->successCreated();
     }
 }
