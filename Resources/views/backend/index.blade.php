@@ -15,7 +15,7 @@
             <div class="ui styled accordion">
                 <div class="title">
                     <i class="dropdown icon"></i>
-                    Saved Events
+                    Presets
                 </div>
                 <div class="content" id="external-events">
                     <div class="transition hidden">
@@ -74,26 +74,106 @@
     </div>
 
 
+    <div class="ui small modal ui form" id="eventDetail">
+        <i class="close icon"></i>
+        <div class="header">
+            <div class="fields">
 
-    <div class="ui flowing popup" id="eventDetail">
-            <form class="ui form">
-                <div class="fourteen wide field">
-                    <label>First Name</label>
-                    <input type="text" name="first-name" placeholder="First Name">
+                <div class="twelve wide field">
+                    <input type="text" name="first-name" v-model="event.title" placeholder="Title">
                 </div>
-                <div class="fourteen wide field">
-                    <label>Last Name</label>
-                    <input type="text" name="last-name" placeholder="Last Name">
-                </div>
-                <div class="field">
-                    <div class="ui checkbox">
-                        <input type="checkbox" tabindex="0" class="hidden">
-                        <label>I agree to the Terms and Conditions</label>
+
+                <div class="four wide field">
+                    <div class="ui fluid floating dropdown button">
+                        <span class="text"></span>
+                        <div class="menu">
+                            <div class="scrolling menu">
+                                <div class="item">
+                                    <div class="ui red empty circular label"></div>
+                                    Important
+                                </div>
+                                <div class="item">
+                                    <div class="ui blue empty circular label"></div>
+                                    Announcement
+                                </div>
+                                <div class="item">
+                                    <div class="ui black empty circular label"></div>
+                                    Cannot Fix
+                                </div>
+                                <div class="item">
+                                    <div class="ui purple empty circular label"></div>
+                                    News
+                                </div>
+                                <div class="item">
+                                    <div class="ui orange empty circular label"></div>
+                                    Enhancement
+                                </div>
+                                <div class="item">
+                                    <div class="ui empty circular label"></div>
+                                    Change Declined
+                                </div>
+                                <div class="item">
+                                    <div class="ui yellow empty circular label"></div>
+                                    Off Topic
+                                </div>
+                                <div class="item">
+                                    <div class="ui pink empty circular label"></div>
+                                    Interesting
+                                </div>
+                                <div class="item">
+                                    <div class="ui green empty circular label"></div>
+                                    Discussion
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <button class="ui button" type="submit">Submit</button>
-            </form>
+            </div>
+
+        </div>
+        <div class="content">
+
+            <div class="field">
+                <label>Location</label>
+                <input type="text" name="title" v-model="event.location">
+            </div>
+
+            <div class="field">
+                <label>Description</label>
+                <textarea rows="2" name="description" v-model="event.description"></textarea>
+            </div>
+
+            <div class="ui divider"></div>
+
+            <div class="field">
+                <div class="ui checked checkbox">
+                    <input type="checkbox" checked="">
+                    <label>All-day</label>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <label>From</label>
+                <input type="text" name="start" v-model="event.start">
+            </div>
+
+            <div class="field">
+                <label>To</label>
+                <input type="text" name="to" v-model="event.end">
+            </div>
+
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancle
+            </div>
+            <div class="ui positive right button">
+                Update
+            </div>
+        </div>
     </div>
+
 
 @endsection
 
@@ -105,6 +185,10 @@
 @section('javascript')
     <script src="{{\Pingpong\Modules\Facades\Module::asset('calendar:js/vendor.js')}}"></script>
     <script>
+        $('.ui.dropdown').dropdown();
+
+        $('.ui.checkbox').checkbox();
+
         $('.ui.accordion').accordion({exclusive: false});
 
         function ini_eventPresets(preset) {
@@ -116,13 +200,12 @@
                     title: $.trim($(this).data('title')),
                     location: $.trim($(this).data('location')),
                     description: $.trim($(this).data('description')),
-                    allDay: $.trim($(this).data('allday')),
+                    allDay: Number($.trim($(this).data('allday'))),
                     start: $.trim($(this).data('start')),
                     end: $.trim($(this).data('end')),
                     duration: $.trim($(this).data('duration')),
                     className: $.trim($(this).data('classname'))
                 };
-
 
                 // store the Event Object in the DOM element so we can get to it later
                 $(this).data('eventObject', eventObject);
@@ -203,21 +286,30 @@
                     var event = $.extend({}, originalEventObject);
 
                     event.start = date;
+
                     if (event.end > 0) {
                         event.end = date.clone().add({minutes: event.duration});
                     }
 
                     var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.store')}}');
                     resource.save(event).then(function (response) {
-                        event.id = response.id;
-                        $('#calendar').fullCalendar('updateEvent', event);
+                        event = response.data.data;
+                        $('#calendar').fullCalendar('renderEvent', event);
                     });
 
-                    console.log(event);
-                    $('#calendar').fullCalendar('renderEvent', event);
                 },
                 eventClick: function (event, jsEvent) {
 
+                    EventDetail.event = event;
+
+                    $('.ui.modal')
+                            .modal({
+                                transition:'fade'
+                            })
+                            .modal('show')
+                    ;
+
+                    return;
                     if (!$(this).popup('exists')) {
                         $(this).popup({
                             popup: $('#eventDetail'),
@@ -226,7 +318,7 @@
                         })
                     }
 
-                    EventDetail.event = event;
+
                     $(this).popup('show');
                     $(this).popup('reposition');
 
