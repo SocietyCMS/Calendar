@@ -51,12 +51,7 @@ class EventController extends ApiBaseController
      */
     public function update(EventUpdateRequest $request, $id)
     {
-        $classNames = array_flip(array_except(array_flip($request->className), ['ui', 'calendar', 'event']));
-
-        $input = array_merge($request->input(), [
-            'end' => (is_null($request->end) && $request->allDay == true) ? Carbon::parse($request->start)->addDay() : $request->end,
-            'className' => implode(' ', $classNames)
-        ]);
+        $input = $this->mergeRequestInput($request);
 
         $event = $this->event->update($input, $id);
         return $this->response->item($event, new EventTransformer);
@@ -69,7 +64,44 @@ class EventController extends ApiBaseController
      */
     public function store(EventStoreRequest $request)
     {
-        $event = $this->event->create($request->input());
-        return $this->successCreated();
+        $input = $this->mergeRequestInput($request);
+
+        $event = $this->event->create($input);
+        return $this->response->item($event, new EventTransformer);
+    }
+
+    /**
+     * @param $request
+     * @return array
+     */
+    private function mergeRequestInput($request)
+    {
+        $classNames = $this->extractCalendarClassNames($request->className);
+
+        $input = array_merge($request->input(), [
+            'end' => (is_null($request->end) && $request->allDay == true) ? Carbon::parse($request->start)->addDay() : $request->end,
+            'className' => implode(' ', $classNames)
+        ]);
+
+        return $input;
+    }
+
+    /**
+     * @param $classNames
+     * @return array
+     */
+    private function extractCalendarClassNames($classNames)
+    {
+        if(is_string($classNames)) {
+            $classNames = explode(" ", $classNames);
+        }
+
+        return array_flip(
+            array_except(array_flip($classNames), [
+                'ui',
+                'calendar',
+                'event'
+            ])
+        );
     }
 }
