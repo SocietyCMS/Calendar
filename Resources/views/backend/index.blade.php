@@ -79,50 +79,25 @@
         <div class="header">
             <div class="fields">
 
-                <div class="twelve wide field">
+                <div class="ten wide field">
                     <input type="text" name="first-name" v-model="event.title" placeholder="Title">
                 </div>
 
-                <div class="four wide field">
-                    <div class="ui fluid floating dropdown button">
-                        <span class="text"></span>
+                <div class="six wide field flex">
+                    <div class="ui fluid floating dropdown button flex align-center-row">
+                        <span class="text">
+                            <div class="ui red empty circular label"></div>
+                                    Private
+                        </span>
                         <div class="menu">
                             <div class="scrolling menu">
                                 <div class="item">
                                     <div class="ui red empty circular label"></div>
-                                    Important
+                                    Private
                                 </div>
                                 <div class="item">
                                     <div class="ui blue empty circular label"></div>
-                                    Announcement
-                                </div>
-                                <div class="item">
-                                    <div class="ui black empty circular label"></div>
-                                    Cannot Fix
-                                </div>
-                                <div class="item">
-                                    <div class="ui purple empty circular label"></div>
-                                    News
-                                </div>
-                                <div class="item">
-                                    <div class="ui orange empty circular label"></div>
-                                    Enhancement
-                                </div>
-                                <div class="item">
-                                    <div class="ui empty circular label"></div>
-                                    Change Declined
-                                </div>
-                                <div class="item">
-                                    <div class="ui yellow empty circular label"></div>
-                                    Off Topic
-                                </div>
-                                <div class="item">
-                                    <div class="ui pink empty circular label"></div>
-                                    Interesting
-                                </div>
-                                <div class="item">
-                                    <div class="ui green empty circular label"></div>
-                                    Discussion
+                                    Public
                                 </div>
                             </div>
                         </div>
@@ -146,8 +121,8 @@
             <div class="ui divider"></div>
 
             <div class="field">
-                <div class="ui checked checkbox">
-                    <input type="checkbox" checked="">
+                <div class="ui checkbox" v-bind:class="{ 'checked': event.allDay}">
+                    <input type="checkbox" v-model="event.allDay">
                     <label>All-day</label>
                 </div>
             </div>
@@ -155,20 +130,20 @@
 
             <div class="field">
                 <label>From</label>
-                <input type="text" name="start" v-model="event.start">
+                <input type="text" name="start" v-model="startDate">
             </div>
 
             <div class="field">
                 <label>To</label>
-                <input type="text" name="to" v-model="event.end">
+                <input type="text" name="to" v-model="endDate">
             </div>
 
         </div>
         <div class="actions">
-            <div class="ui black deny button">
+            <div class="ui black deny button" v-on:click="cancle">
                 Cancle
             </div>
-            <div class="ui positive right button">
+            <div class="ui positive right button" v-on:click="update">
                 Update
             </div>
         </div>
@@ -193,9 +168,6 @@
 
         function ini_eventPresets(preset) {
             preset.each(function () {
-
-                // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
-                // it doesn't need to have a start or end
                 var eventObject = {
                     title: $.trim($(this).data('title')),
                     location: $.trim($(this).data('location')),
@@ -207,16 +179,13 @@
                     className: $.trim($(this).data('classname'))
                 };
 
-                // store the Event Object in the DOM element so we can get to it later
                 $(this).data('eventObject', eventObject);
 
-                // make the event draggable using jQuery UI
                 $(this).draggable({
                     zIndex: 1070,
-                    revert: true, // will cause the event to go back to its
-                    revertDuration: 0  //  original position after the drag
+                    revert: true,
+                    revertDuration: 0
                 });
-
             });
         }
 
@@ -230,8 +199,49 @@
                     location: '',
                     description: '',
                     allDay: false,
-                    start: null,
-                    end: null
+                    start: $.fullCalendar.moment(),
+                    end: $.fullCalendar.moment()
+                },
+                eventBackup:null
+            },
+            computed: {
+                startDate: {
+                    get: function () {
+                        return this.event.start.toISOString()
+                    },
+                    set: function (newValue) {
+                        this.event.start = $.fullCalendar.moment.parseZone(newValue);
+                    }
+                },
+                endDate: {
+                    get: function () {
+                        return this.event.end.toISOString()
+                    },
+                    set: function (newValue) {
+                        this.event.end = $.fullCalendar.moment.parseZone(newValue);
+                    }
+                }
+            },
+            methods: {
+                update: function (sender) {
+                    var event = this.event;
+                    var resource = Vue.resource('{{apiRoute('v1', 'api.calendar.event.update', ['event' => ':id'])}}');
+                    resource.update({id: event.id}, event).then(function (response) {
+                        $('#calendar').fullCalendar('updateEvent', event);
+                    }, function (errorResponse) {
+                    });
+                },
+                cancle: function() {
+                    this.event = this.eventBackup;
+                    $('#calendar').fullCalendar('updateEvent', this.event);
+                },
+                openDetail: function() {
+                    this.eventBackup = jQuery.extend(true, {}, this.event);
+                    $('.ui.modal')
+                            .modal({
+                                transition:'fade'
+                            })
+                            .modal('show');
                 }
             }
         });
@@ -287,7 +297,7 @@
 
                     event.start = date;
 
-                    if (event.end > 0) {
+                    if (event.end != 0) {
                         event.end = date.clone().add({minutes: event.duration});
                     }
 
@@ -299,29 +309,8 @@
 
                 },
                 eventClick: function (event, jsEvent) {
-
                     EventDetail.event = event;
-
-                    $('.ui.modal')
-                            .modal({
-                                transition:'fade'
-                            })
-                            .modal('show')
-                    ;
-
-                    return;
-                    if (!$(this).popup('exists')) {
-                        $(this).popup({
-                            popup: $('#eventDetail'),
-                            target: $(this),
-                            on: 'manual'
-                        })
-                    }
-
-
-                    $(this).popup('show');
-                    $(this).popup('reposition');
-
+                    EventDetail.openDetail();
                 }
             });
 
