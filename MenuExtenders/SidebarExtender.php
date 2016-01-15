@@ -38,7 +38,7 @@ class SidebarExtender implements \Maatwebsite\Sidebar\SidebarExtender
                 $item->weight(10);
                 $item->route('backend::calendar.calendar.index');
                 $item->authorize(
-                    $this->auth->hasAccess('calendar.calendar.index')
+                    $this->auth->can('calendar::manage-calendar')
                 );
             });
 
